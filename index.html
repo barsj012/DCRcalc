@@ -1,4 +1,29 @@
-import { useState, useMemo } from “react”;
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSD Target Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #F2EFE8; font-family: Georgia, serif; }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
 
 const SB = {
 green: “#00704A”, darkGreen: “#1E3932”, lightGreen: “#D4E9E2”,
@@ -58,26 +83,49 @@ return TSD_CHART.find(r => t >= r.min && t < r.max) || TSD_CHART[TSD_CHART.lengt
 
 const SLOTS = generateSlots();
 
-function CoffeeIcon() {
+function SBLabel({ children, noBottom }) {
+return <div style={{ fontSize: 9, color: SB.darkGreen, textTransform: “uppercase”, letterSpacing: “0.18em”, fontWeight: 700, marginBottom: noBottom ? 0 : 7 }}>{children}</div>;
+}
+function STH({ children, white, green }) {
+return <div style={{ fontSize: 9, color: white ? SB.white : green ? SB.darkGreen : SB.gray, textTransform: “uppercase”, letterSpacing: “0.1em”, padding: “8px 10px”, fontWeight: 700 }}>{children}</div>;
+}
+function SBPill({ label, value, color }) {
 return (
-<div style={{ width: 36, height: 36, borderRadius: “50%”, background: SB.green, display: “flex”, alignItems: “center”, justifyContent: “center”, fontSize: 18, border: “2px solid rgba(255,255,255,0.3)” }}>
-☕
+<div style={{ background: SB.white, border: “1px solid #ddd”, borderRadius: 8, padding: “7px 10px”, flex: 1, textAlign: “center” }}>
+<div style={{ fontSize: 8, color: SB.gray, textTransform: “uppercase”, letterSpacing: “0.1em”, marginBottom: 3 }}>{label}</div>
+<div style={{ fontSize: 13, fontWeight: 700, color }}>{value}</div>
+</div>
+);
+}
+function SBCalcRow({ label, value, color }) {
+return (
+<div style={{ display: “flex”, justifyContent: “space-between”, padding: “6px 0”, borderBottom: “1px solid #f0f0f0” }}>
+<span style={{ fontSize: 11, color: SB.gray }}>{label}</span>
+<span style={{ fontSize: 12, fontWeight: 600, color: color || SB.black }}>{value}</span>
+</div>
+);
+}
+function SheetStat({ label, value }) {
+return (
+<div>
+<div style={{ fontSize: 8, color: SB.lightGreen, textTransform: “uppercase”, letterSpacing: “0.1em”, marginBottom: 2 }}>{label}</div>
+<div style={{ fontSize: 13, fontWeight: 700, color: SB.white }}>{value}</div>
 </div>
 );
 }
 
-export default function App() {
-const [view, setView] = useState(“manager”);
-const [planned, setPlanned] = useState(””);
-const [scheduled, setScheduled] = useState(””);
-const [dayLabel, setDayLabel] = useState(””);
-const [projectedDailyTSD, setProjectedDailyTSD] = useState(””);
-const [windows, setWindows] = useState([{ start: “”, end: “” }]);
-const [projectedTSD, setProjectedTSD] = useState(Array(SLOTS.length).fill(””));
-const [actualTSD, setActualTSD] = useState(Array(SLOTS.length).fill(””));
-const [published, setPublished] = useState(false);
-const [exporting, setExporting] = useState(false);
-const [checkInTimes, setCheckInTimes] = useState([“Before Peak”, “After Peak”, “2:00 PM”, “4:00 PM”]);
+function App() {
+const [view, setView] = React.useState(“manager”);
+const [planned, setPlanned] = React.useState(””);
+const [scheduled, setScheduled] = React.useState(””);
+const [dayLabel, setDayLabel] = React.useState(””);
+const [projectedDailyTSD, setProjectedDailyTSD] = React.useState(””);
+const [windows, setWindows] = React.useState([{ start: “”, end: “” }]);
+const [projectedTSD, setProjectedTSD] = React.useState(Array(SLOTS.length).fill(””));
+const [actualTSD, setActualTSD] = React.useState(Array(SLOTS.length).fill(””));
+const [published, setPublished] = React.useState(false);
+const [exporting, setExporting] = React.useState(false);
+const [checkInTimes, setCheckInTimes] = React.useState([“Before Peak”, “After Peak”, “2:00 PM”, “4:00 PM”]);
 
 const plannedN   = parseFloat(planned) || 0;
 const scheduledN = parseFloat(scheduled) || 0;
@@ -85,7 +133,7 @@ const extraHours = Math.max(0, scheduledN - plannedN);
 const dailyTSD   = parseFloat(projectedDailyTSD) || 0;
 const insideAdj  = extraHours > 0 && dailyTSD > 0 ? (dailyTSD / 2) / extraHours : 0;
 
-const parsedWindows = useMemo(() =>
+const parsedWindows = React.useMemo(() =>
 windows.map(w => {
 const s = parseTimeInput(w.start);
 const e = parseTimeInput(w.end);
@@ -103,8 +151,8 @@ if (parsedWindows.some(w => t >= timeToDecimal(w.sh, w.sm) && t <= timeToDecimal
 return “carry”;
 }
 
-const insideSlotCount = useMemo(() => SLOTS.filter(s => getSlotZone(s) === “inside”).length, [parsedWindows]);
-const betweenSlotCount = useMemo(() => SLOTS.filter(s => {
+const insideSlotCount = React.useMemo(() => SLOTS.filter(s => getSlotZone(s) === “inside”).length, [parsedWindows]);
+const betweenSlotCount = React.useMemo(() => SLOTS.filter(s => {
 const t = timeToDecimal(s.hour, s.min);
 if (!firstWindowStart || !lastWindowEnd) return false;
 return t > firstWindowStart && t < lastWindowEnd && getSlotZone(s) === “carry”;
@@ -113,7 +161,7 @@ return t > firstWindowStart && t < lastWindowEnd && getSlotZone(s) === “carry�
 const totalEarnedAdj = insideAdj * insideSlotCount;
 const betweenAdj = (insideSlotCount + betweenSlotCount) > 0 ? totalEarnedAdj / (insideSlotCount + betweenSlotCount) : 0;
 
-const slotAdjustments = useMemo(() => {
+const slotAdjustments = React.useMemo(() => {
 let cumulative = 0;
 return SLOTS.map(slot => {
 const zone = getSlotZone(slot);
@@ -128,7 +176,7 @@ return 0;
 });
 }, [parsedWindows, insideAdj, totalEarnedAdj, betweenAdj]);
 
-const targets = useMemo(() =>
+const targets = React.useMemo(() =>
 SLOTS.map((slot, i) => {
 const base = parseFloat(projectedTSD[i]);
 if (isNaN(base) || projectedTSD[i] === “”) return null;
@@ -157,7 +205,7 @@ return next;
 }
 };
 
-const lastActualIdx  = useMemo(() => actualTSD.reduce((acc, v, i) => v !== “” ? i : acc, -1), [actualTSD]);
+const lastActualIdx  = React.useMemo(() => actualTSD.reduce((acc, v, i) => v !== “” ? i : acc, -1), [actualTSD]);
 const currentActual  = lastActualIdx >= 0 ? (parseFloat(actualTSD[lastActualIdx]) || 0) : null;
 const currentTarget  = lastActualIdx >= 0 ? targets[lastActualIdx] : null;
 const gap            = currentActual !== null && currentTarget !== null ? currentActual - currentTarget : null;
@@ -167,10 +215,10 @@ const hoursToCut     = Math.max(0, extraHours - justifiedHours);
 
 const paceStatus = gap === null ? “neutral” : gap >= 0 ? “good” : gap >= -10 ? “close” : “behind”;
 const paceMap = {
-neutral: { color: SB.gray,    bg: SB.lightGray, border: “#ccc”,      label: “Enter actuals to track” },
-good:    { color: SB.green,   bg: “#e6f4ee”,    border: SB.green,    label: “On Pace - Keep the crew!” },
-close:   { color: SB.gold,    bg: “#fdf5e6”,    border: SB.gold,     label: “Close - Watch It” },
-behind:  { color: “#c0392b”,  bg: “#fde8e6”,    border: “#c0392b”,   label: “Behind - Cut Hours” },
+neutral: { color: SB.gray,   bg: SB.lightGray, border: “#ccc”,     label: “Enter actuals to track” },
+good:    { color: SB.green,  bg: “#e6f4ee”,    border: SB.green,   label: “On Pace - Keep the crew!” },
+close:   { color: SB.gold,   bg: “#fdf5e6”,    border: SB.gold,    label: “Close - Watch It” },
+behind:  { color: “#c0392b”, bg: “#fde8e6”,    border: “#c0392b”,  label: “Behind - Cut Hours” },
 };
 const pace = paceMap[paceStatus];
 
@@ -180,44 +228,12 @@ if (zone === “carry”) return SB.gold;
 return SB.gray;
 }
 
-const exportPNG = async () => {
-const el = document.getElementById(“export-sheet”);
-if (!el) return;
-setExporting(true);
-const doExport = async () => {
-try {
-el.style.left = “0px”; el.style.top = “0px”;
-el.style.position = “absolute”; el.style.zIndex = “-1”;
-const canvas = await window.html2canvas(el, { backgroundColor: “#ffffff”, scale: 2, useCORS: true, logging: false });
-el.style.position = “fixed”; el.style.left = “-9999px”;
-const link = document.createElement(“a”);
-link.download = “TSD-Targets-” + (dayLabel || “day”) + “.png”;
-link.href = canvas.toDataURL(“image/png”);
-link.click();
-} catch(err) {
-alert(“Export failed: “ + err.message);
-} finally {
-setExporting(false);
-}
-};
-if (window.html2canvas) {
-await doExport();
-} else {
-const script = document.createElement(“script”);
-script.src = “https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js”;
-script.onload = doExport;
-script.onerror = () => { alert(“Could not load export library.”); setExporting(false); };
-document.head.appendChild(script);
-}
-};
-
 const inp = {
 display: “block”, width: “100%”, boxSizing: “border-box”,
 background: SB.white, border: “1px solid #ccc”, borderRadius: 8,
 color: SB.black, fontFamily: “Georgia, serif”, fontSize: 15,
 padding: “10px 12px”, outline: “none”,
 };
-
 const inlineInp = {
 display: “block”, width: “100%”, boxSizing: “border-box”,
 background: “transparent”, border: “none”, borderBottom: “1px solid #ccc”,
@@ -232,8 +248,8 @@ return (
 
 ```
   {/* Header */}
-  <div style={{ background: SB.darkGreen, padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-    <CoffeeIcon />
+  <div style={{ background: SB.darkGreen, padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }} className="no-print">
+    <div style={{ width: 36, height: 36, borderRadius: "50%", background: SB.green, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, border: "2px solid rgba(255,255,255,0.3)" }}>☕</div>
     <div>
       <div style={{ fontSize: 10, letterSpacing: "0.2em", color: SB.lightGreen, textTransform: "uppercase", marginBottom: 2 }}>Starbucks Labor</div>
       <div style={{ fontSize: 20, fontWeight: 700, color: SB.white }}>TSD Target Tracker</div>
@@ -242,27 +258,24 @@ return (
   </div>
 
   {/* Tabs */}
-  <div style={{ display: "flex", background: SB.green, borderBottom: "3px solid " + SB.darkGreen }}>
-    {TABS.map(function(tab) {
-      const key = tab[0]; const label = tab[1];
-      return (
-        <button key={key} onClick={() => setView(key)} style={{
-          flex: 1, padding: "11px 6px", border: "none",
-          background: view === key ? SB.white : "transparent",
-          color: view === key ? SB.darkGreen : SB.lightGreen,
-          fontFamily: "Georgia, serif", fontSize: 11, fontWeight: 700,
-          cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em",
-          borderRadius: view === key ? "6px 6px 0 0" : 0,
-        }}>{label}</button>
-      );
-    })}
+  <div style={{ display: "flex", background: SB.green, borderBottom: "3px solid " + SB.darkGreen }} className="no-print">
+    {TABS.map(tab => (
+      <button key={tab[0]} onClick={() => setView(tab[0])} style={{
+        flex: 1, padding: "11px 6px", border: "none",
+        background: view === tab[0] ? SB.white : "transparent",
+        color: view === tab[0] ? SB.darkGreen : SB.lightGreen,
+        fontFamily: "Georgia, serif", fontSize: 11, fontWeight: 700,
+        cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.05em",
+        borderRadius: view === tab[0] ? "6px 6px 0 0" : 0,
+      }}>{tab[1]}</button>
+    ))}
   </div>
 
   <div style={{ maxWidth: 520, margin: "0 auto", padding: "18px 14px 60px" }}>
 
     {/* SETUP TAB */}
     {view === "manager" && (
-      <div>
+      <div className="no-print">
         <SBLabel>Day / Date</SBLabel>
         <input type="text" placeholder="e.g. Friday Apr 11" value={dayLabel} onChange={e => setDayLabel(e.target.value)} style={{ ...inp, marginBottom: 12 }} />
 
@@ -284,11 +297,10 @@ return (
           <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
             <SBPill label="Extra Hrs" value={"+" + extraHours.toFixed(2)} color={SB.gold} />
             <SBPill label="Adj/slot" value={"+" + insideAdj.toFixed(1)} color={SB.green} />
-            <SBPill label="Total Earned" value={insideSlotCount > 0 ? "+" + Math.round(totalEarnedAdj) : "Set windows"} color={SB.darkGreen} />
+            <SBPill label="New Daily TSD" value={insideSlotCount > 0 ? Math.round(dailyTSD + totalEarnedAdj) : "Set windows"} color={SB.darkGreen} />
           </div>
         )}
 
-        {/* Labor Windows */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <SBLabel noBottom>Extra Labor Windows</SBLabel>
@@ -308,7 +320,6 @@ return (
           {windowDebug ? <div style={{ fontSize: 10, color: SB.green, marginTop: 4 }}>Parsed: {windowDebug}</div> : null}
         </div>
 
-        {/* Check-in Times */}
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
             <SBLabel noBottom>SSV Check-In Times</SBLabel>
@@ -317,9 +328,7 @@ return (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
             {checkInTimes.map((t, i) => (
               <div key={i} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <input type="text" value={t}
-                  onChange={e => setCheckInTimes(prev => { const n = [...prev]; n[i] = e.target.value; return n; })}
-                  style={{ ...inp, flex: 1, fontSize: 13, padding: "8px 10px" }} />
+                <input type="text" value={t} onChange={e => setCheckInTimes(prev => { const n = [...prev]; n[i] = e.target.value; return n; })} style={{ ...inp, flex: 1, fontSize: 13, padding: "8px 10px" }} />
                 {checkInTimes.length > 1 && (
                   <button onClick={() => setCheckInTimes(prev => prev.filter((_, idx) => idx !== i))} style={{ color: "#c0392b", background: "transparent", border: "none", cursor: "pointer", fontSize: 16 }}>x</button>
                 )}
@@ -328,17 +337,10 @@ return (
           </div>
         </div>
 
-        {/* Paste Box */}
         <SBLabel>Paste Running Totals from Spreadsheet</SBLabel>
-        <textarea
-          placeholder={"Paste your Running Total row:\nRunning Total  0  0  11  25  42..."}
-          rows={3}
-          onChange={handlePaste}
-          style={{ ...inp, fontSize: 12, resize: "vertical", marginBottom: 4 }}
-        />
-        <div style={{ fontSize: 10, color: SB.gray, marginBottom: 14 }}>Copy the Running Total row and paste - all slots fill automatically</div>
+        <textarea placeholder={"Paste Running Total row here:\n0  0  11  25  42  70..."} rows={3} onChange={handlePaste} style={{ ...inp, fontSize: 12, resize: "vertical", marginBottom: 4 }} />
+        <div style={{ fontSize: 10, color: SB.gray, marginBottom: 14 }}>Copy the Running Total row and paste - slots fill automatically</div>
 
-        {/* TSD Table */}
         <SBLabel>System Projected TSD - per half-hour</SBLabel>
         <div style={{ background: SB.white, border: "1px solid #ccc", borderRadius: 12, overflow: "hidden", marginBottom: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: "85px 14px 1fr 95px", borderBottom: "1px solid #e0e0e0", background: SB.lightGreen }}>
@@ -354,7 +356,7 @@ return (
                 <div key={i} style={{ display: "grid", gridTemplateColumns: "85px 14px 1fr 95px", borderBottom: "1px solid #f0f0f0", background: zone === "inside" ? "#e8f5ee" : zone === "carry" ? "#fdf8ee" : SB.white }}>
                   <div style={{ padding: "7px 10px", fontSize: 10, color: hasVal ? SB.black : "#bbb", display: "flex", alignItems: "center" }}>{fmtTime(slot.hour, slot.min)}</div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {adj > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: zoneColor(zone) }} />}
+                    {adj > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: zoneColor(zone) }}></div>}
                   </div>
                   <div style={{ padding: "5px 8px", display: "flex", alignItems: "center" }}>
                     <input type="number" inputMode="numeric" placeholder="-" value={projectedTSD[i]} onChange={e => updateProjected(i, e.target.value)} style={inlineInp} />
@@ -371,13 +373,8 @@ return (
 
         {hasTargets && (
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => { setPublished(true); setView("screenshot"); }}
-              style={{ flex: 2, padding: "14px", borderRadius: 10, border: "none", background: SB.green, color: SB.white, fontFamily: "Georgia, serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            <button onClick={() => { setPublished(true); setView("screenshot"); }} style={{ flex: 2, padding: "14px", borderRadius: 10, border: "none", background: SB.green, color: SB.white, fontFamily: "Georgia, serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
               Publish and View Sheet
-            </button>
-            <button onClick={exportPNG} disabled={exporting}
-              style={{ flex: 1, padding: "14px", borderRadius: 10, border: "1px solid " + SB.green, background: "transparent", color: exporting ? SB.gray : SB.green, fontFamily: "Georgia, serif", fontSize: 12, fontWeight: 700, cursor: exporting ? "wait" : "pointer" }}>
-              {exporting ? "..." : "PNG"}
             </button>
           </div>
         )}
@@ -392,10 +389,9 @@ return (
         ) : (
           <div>
             <div style={{ background: SB.white, borderRadius: 16, overflow: "hidden", border: "1px solid #ddd" }}>
-              {/* Sheet Header */}
               <div style={{ background: SB.darkGreen, padding: "16px 20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                  <CoffeeIcon />
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: SB.green, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, border: "2px solid rgba(255,255,255,0.3)" }}>☕</div>
                   <div>
                     <div style={{ fontSize: 9, color: SB.lightGreen, textTransform: "uppercase", letterSpacing: "0.15em" }}>TSD Target Sheet</div>
                     <div style={{ fontSize: 20, fontWeight: 700, color: SB.white }}>{dayLabel || "Today"}</div>
@@ -409,7 +405,6 @@ return (
                     <SheetStat key={i} label={"Window " + (i + 1)} value={fmtTime(w.sh, w.sm) + " - " + fmtTime(w.eh, w.em)} />
                   ))}
                 </div>
-                {/* Check-in times */}
                 {checkInTimes.filter(t => t.trim()).length > 0 && (
                   <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 10 }}>
                     <div style={{ fontSize: 8, color: SB.lightGreen, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>SSV Check-In Times</div>
@@ -422,19 +417,15 @@ return (
                 )}
               </div>
 
-              {/* Legend */}
               <div style={{ background: SB.lightGreen, padding: "8px 16px", display: "flex", gap: 16, fontSize: 10, color: SB.darkGreen }}>
-                <span style={{ fontWeight: 700, color: SB.green }}>Green</span><span>= extra labor window</span>
-                <span style={{ fontWeight: 700, color: SB.gold }}>Gold</span><span>= elevated carry</span>
-                <span>Plain = system projected</span>
+                <span><b style={{ color: SB.green }}>Green</b> = extra labor window</span>
+                <span><b style={{ color: SB.gold }}>Gold</b> = elevated carry</span>
               </div>
 
-              {/* Table header */}
               <div style={{ display: "grid", gridTemplateColumns: "90px 14px 1fr 90px", background: SB.green }}>
                 <STH white>Time</STH><STH white></STH><STH white>Target TSD</STH><STH white>Actual</STH>
               </div>
 
-              {/* Table rows */}
               {SLOTS.map((slot, i) => {
                 const target = targets[i];
                 if (target === null) return null;
@@ -445,39 +436,32 @@ return (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "90px 14px 1fr 90px", borderBottom: "1px solid #f0f0f0", background: zone === "inside" ? "#e8f5ee" : zone === "carry" ? "#fdf8ee" : isEven ? SB.white : SB.cream }}>
                     <div style={{ padding: "9px 12px", fontSize: 12, fontWeight: zone === "inside" ? 700 : 400, color: SB.black, display: "flex", alignItems: "center" }}>{fmtTime(slot.hour, slot.min)}</div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {adj > 0 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: zoneColor(zone) }} />}
+                      {adj > 0 && <div style={{ width: 6, height: 6, borderRadius: "50%", background: zoneColor(zone) }}></div>}
                     </div>
                     <div style={{ padding: "9px 12px", display: "flex", alignItems: "center", gap: 6 }}>
                       <span style={{ fontSize: 20, fontWeight: 700, color: zoneColor(zone) }}>{target}</span>
                       {adj > 0 && <span style={{ fontSize: 9, color: SB.gray }}>+{Math.round(adj)}</span>}
                     </div>
                     <div style={{ padding: "9px 12px", display: "flex", alignItems: "center" }}>
-                      <div style={{ width: "80%", borderBottom: "1.5px solid #bbb", height: 22 }} />
+                      <div style={{ width: "80%", borderBottom: "1.5px solid #bbb", height: 22 }}></div>
                     </div>
                   </div>
                 );
               })}
 
-              {/* Footer */}
               <div style={{ background: SB.darkGreen, padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div style={{ fontSize: 10, color: SB.lightGreen }}>Planned {plannedN.toFixed(2)} - Scheduled {scheduledN.toFixed(2)}</div>
                 <div style={{ fontSize: 16 }}>☕</div>
               </div>
             </div>
 
-            {/* Buttons */}
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
-              <button onClick={() => window.print()}
-                style={{ flex: 1, padding: "13px", borderRadius: 10, border: "none", background: SB.green, color: SB.white, fontFamily: "Georgia, serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                Print / Save as PDF
-              </button>
-              <button onClick={exportPNG} disabled={exporting}
-                style={{ flex: 1, padding: "13px", borderRadius: 10, border: "1px solid " + SB.green, background: "transparent", color: exporting ? SB.gray : SB.green, fontFamily: "Georgia, serif", fontSize: 13, fontWeight: 700, cursor: exporting ? "wait" : "pointer" }}>
-                {exporting ? "Generating..." : "Save as PNG"}
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }} className="no-print">
+              <button onClick={() => window.print()} style={{ flex: 1, padding: "13px", borderRadius: 10, border: "none", background: SB.green, color: SB.white, fontFamily: "Georgia, serif", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                🖨 Print / Save as PDF
               </button>
             </div>
-            <div style={{ fontSize: 10, color: SB.gray, textAlign: "center", marginTop: 6 }}>
-              Print dialog - choose Save as PDF for a clean file
+            <div style={{ fontSize: 10, color: SB.gray, textAlign: "center", marginTop: 6 }} className="no-print">
+              In print dialog choose "Save as PDF"
             </div>
           </div>
         )}
@@ -486,12 +470,11 @@ return (
 
     {/* SSV TAB */}
     {view === "ssv" && (
-      <div>
+      <div className="no-print">
         {!published || !hasTargets ? (
           <div style={{ textAlign: "center", padding: "40px 20px", color: SB.gray, fontSize: 13 }}>Complete Setup first.</div>
         ) : (
           <div>
-            {/* Pace banner */}
             <div style={{ background: pace.bg, border: "2px solid " + pace.border, borderRadius: 12, padding: "14px 18px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: pace.color, marginBottom: 4 }}>{pace.label}</div>
@@ -529,7 +512,7 @@ return (
                     <div key={i} style={{ display: "grid", gridTemplateColumns: "80px 14px 70px 1fr 55px", borderBottom: "1px solid #f0f0f0", background: isLast ? SB.lightGreen : zone === "inside" ? "#e8f5ee" : SB.white }}>
                       <div style={{ padding: "7px 8px", fontSize: 10, color: isLast ? SB.darkGreen : SB.gray, display: "flex", alignItems: "center" }}>{fmtTime(slot.hour, slot.min)}</div>
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {slotAdjustments[i] > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: zoneColor(zone) }} />}
+                        {slotAdjustments[i] > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: zoneColor(zone) }}></div>}
                       </div>
                       <div style={{ padding: "7px 8px", fontSize: 15, fontWeight: 700, color: zoneColor(zone), display: "flex", alignItems: "center" }}>{target}</div>
                       <div style={{ padding: "5px 6px", display: "flex", alignItems: "center" }}>
@@ -545,7 +528,7 @@ return (
             </div>
 
             {lastActualIdx >= 0 && (
-              <div style={{ background: SB.white, border: "2px solid " + (hoursToCut > 0 ? "#c0392b" : SB.green), borderRadius: 12, padding: 16, marginBottom: 14 }}>
+              <div style={{ background: SB.white, border: "2px solid " + (hoursToCut > 0 ? "#c0392b" : SB.green), borderRadius: 12, padding: 16 }}>
                 <div style={{ fontSize: 9, color: SB.gray, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 10 }}>Cut Calculation</div>
                 <SBCalcRow label="Extra hours scheduled" value={"+" + extraHours.toFixed(2) + " hrs"} color={SB.gold} />
                 <SBCalcRow label={"TSD at " + fmtTime(SLOTS[lastActualIdx].hour, SLOTS[lastActualIdx].min)} value={currentActual + " transactions"} />
@@ -558,72 +541,10 @@ return (
                 </div>
               </div>
             )}
-
-            <button onClick={exportPNG} disabled={exporting}
-              style={{ width: "100%", padding: "13px", borderRadius: 10, border: "1px solid " + SB.green, background: "transparent", color: exporting ? SB.gray : SB.green, fontFamily: "Georgia, serif", fontSize: 12, fontWeight: 700, cursor: exporting ? "wait" : "pointer" }}>
-              {exporting ? "Generating..." : "Export Target Sheet as PNG"}
-            </button>
           </div>
         )}
       </div>
     )}
-  </div>
-
-  {/* Hidden PNG export sheet */}
-  <div id="export-sheet" style={{ position: "fixed", left: "-9999px", top: 0, background: SB.white, fontFamily: "Georgia, serif", width: 480, padding: 0, overflow: "hidden" }}>
-    <div style={{ background: SB.darkGreen, padding: "16px 20px" }}>
-      <div style={{ fontSize: 9, color: SB.lightGreen, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>TSD Target Sheet</div>
-      <div style={{ fontSize: 24, fontWeight: 700, color: SB.white, marginBottom: 8 }}>{dayLabel || "Today"}</div>
-      <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 10 }}>
-        <SheetStat label="Extra Hrs" value={"+" + extraHours.toFixed(2)} />
-        <SheetStat label="New Daily TSD" value={Math.round(dailyTSD + totalEarnedAdj)} />
-        {parsedWindows.map((w, i) => <SheetStat key={i} label={"Window " + (i + 1)} value={fmtTime(w.sh, w.sm) + "-" + fmtTime(w.eh, w.em)} />)}
-      </div>
-      {checkInTimes.filter(t => t.trim()).length > 0 && (
-        <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 8 }}>
-          <div style={{ fontSize: 8, color: SB.lightGreen, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>SSV Check-In Times</div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {checkInTimes.filter(t => t.trim()).map((t, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.15)", borderRadius: 6, padding: "4px 10px", fontSize: 11, color: SB.white, fontWeight: 700 }}>{t}</div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-      <thead>
-        <tr style={{ background: SB.green }}>
-          <th style={{ textAlign: "left", padding: "8px 12px", fontSize: 10, color: SB.white, textTransform: "uppercase" }}>Time</th>
-          <th style={{ textAlign: "center", padding: "8px 12px", fontSize: 10, color: SB.white, textTransform: "uppercase" }}>Target TSD</th>
-          <th style={{ textAlign: "center", padding: "8px 12px", fontSize: 10, color: SB.white, textTransform: "uppercase", width: 110 }}>Actual TSD</th>
-          <th style={{ textAlign: "center", padding: "8px 12px", fontSize: 10, color: SB.white, width: 50 }}>Done</th>
-        </tr>
-      </thead>
-      <tbody>
-        {SLOTS.map((slot, i) => {
-          const target = targets[i];
-          if (target === null) return null;
-          const zone  = getSlotZone(slot);
-          const isEven = i % 2 === 0;
-          return (
-            <tr key={i} style={{ background: zone === "inside" ? "#e8f5ee" : zone === "carry" ? "#fdf8ee" : isEven ? SB.white : SB.cream, borderBottom: "1px solid #eee" }}>
-              <td style={{ padding: "8px 12px", fontSize: 12, fontWeight: zone === "inside" ? 700 : 400 }}>{fmtTime(slot.hour, slot.min)}</td>
-              <td style={{ padding: "8px 12px", textAlign: "center", fontSize: 20, fontWeight: 700, color: zoneColor(zone) }}>{target}</td>
-              <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                <div style={{ borderBottom: "1.5px solid #aaa", width: "80%", margin: "0 auto", height: 22 }} />
-              </td>
-              <td style={{ padding: "8px 12px", textAlign: "center" }}>
-                <div style={{ width: 18, height: 18, border: "1.5px solid #aaa", borderRadius: 3, margin: "0 auto" }} />
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-    <div style={{ background: SB.darkGreen, padding: "10px 16px", display: "flex", justifyContent: "space-between" }}>
-      <div style={{ fontSize: 10, color: SB.lightGreen }}>Planned {plannedN.toFixed(2)} - Scheduled {scheduledN.toFixed(2)}</div>
-      <div style={{ fontSize: 10, color: SB.lightGreen }}>Starbucks Labor Tracker</div>
-    </div>
   </div>
 </div>
 ```
@@ -631,33 +552,8 @@ return (
 );
 }
 
-function SBLabel({ children, noBottom }) {
-return <div style={{ fontSize: 9, color: SB.darkGreen, textTransform: “uppercase”, letterSpacing: “0.18em”, fontWeight: 700, marginBottom: noBottom ? 0 : 7 }}>{children}</div>;
-}
-function STH({ children, green, white }) {
-return <div style={{ fontSize: 9, color: white ? SB.white : green ? SB.darkGreen : SB.gray, textTransform: “uppercase”, letterSpacing: “0.1em”, padding: “8px 10px”, fontWeight: 700 }}>{children}</div>;
-}
-function SBPill({ label, value, color }) {
-return (
-<div style={{ background: SB.white, border: “1px solid #ddd”, borderRadius: 8, padding: “7px 10px”, flex: 1, textAlign: “center” }}>
-<div style={{ fontSize: 8, color: SB.gray, textTransform: “uppercase”, letterSpacing: “0.1em”, marginBottom: 3 }}>{label}</div>
-<div style={{ fontSize: 13, fontWeight: 700, color: color }}>{value}</div>
-</div>
-);
-}
-function SBCalcRow({ label, value, color }) {
-return (
-<div style={{ display: “flex”, justifyContent: “space-between”, padding: “6px 0”, borderBottom: “1px solid #f0f0f0” }}>
-<span style={{ fontSize: 11, color: SB.gray }}>{label}</span>
-<span style={{ fontSize: 12, fontWeight: 600, color: color || SB.black }}>{value}</span>
-</div>
-);
-}
-function SheetStat({ label, value }) {
-return (
-<div>
-<div style={{ fontSize: 8, color: SB.lightGreen, textTransform: “uppercase”, letterSpacing: “0.1em”, marginBottom: 2 }}>{label}</div>
-<div style={{ fontSize: 13, fontWeight: 700, color: SB.white }}>{value}</div>
-</div>
-);
-}
+ReactDOM.createRoot(document.getElementById(“root”)).render(<App />);
+</script>
+
+</body>
+</html>
